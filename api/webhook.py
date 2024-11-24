@@ -42,9 +42,12 @@ def get_usdt_dominance():
         stablecoin_market_cap = data["data"]["stablecoin_market_cap"]
         total_market_cap = data["data"]["quote"]["USD"]["total_market_cap"]
 
-        # Calculate USDT dominance as 74% of stablecoin market cap
+        # Adjust USDT market cap as 74% of the stablecoin market cap
         usdt_market_cap = 0.74 * stablecoin_market_cap
+
+        # Calculate USDT dominance
         usdt_dominance = (usdt_market_cap / total_market_cap) * 100
+        print(f"Calculated USDT Dominance: {usdt_dominance}%")  # Debugging
         return usdt_dominance
 
     except Exception as e:

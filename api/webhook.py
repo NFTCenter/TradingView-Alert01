@@ -1,5 +1,4 @@
 import os
-import time
 import requests
 from flask import Flask, request
 
@@ -36,7 +35,6 @@ def get_usdt_dominance():
         response = requests.get(CMC_URL, headers=headers)
         response.raise_for_status()
         data = response.json()
-        # Assuming USDT dominance data is under this key structure
         usdt_dominance = data["data"]["btc_dominance"]  # Replace with the correct path if necessary
         return usdt_dominance
     except Exception as e:
@@ -44,7 +42,7 @@ def get_usdt_dominance():
         return None
 
 
-@app.route("/api/monitor", methods=["POST"])
+@app.route("/api/webhook", methods=["POST"])
 def monitor_usdt():
     """Trigger USDT dominance monitoring manually or on schedule."""
     dominance = get_usdt_dominance()
@@ -71,7 +69,5 @@ def test_env():
     }
 
 
-# Remove the continuous loop for serverless deployment
 if __name__ == "__main__":
-    # For local testing only
-    app.run(debug=True)
+    app.run(debug=True)  # For local testing only

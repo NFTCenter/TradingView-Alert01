@@ -8,7 +8,7 @@ app = Flask(__name__)
 # CoinMarketCap API Configuration
 CMC_API_KEY = os.getenv("CMC_API")  # API key from Vercel environment variables
 CMC_URL = "https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest"
-USDT_D_THRESHOLD = 7.0  # Replace with your target dominance value
+USDT_D_THRESHOLD = 3.8  # Target dominance value to trigger alerts
 
 # Telegram Bot Configuration
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Telegram bot token
@@ -35,7 +35,9 @@ def get_usdt_dominance():
         response = requests.get(CMC_URL, headers=headers)
         response.raise_for_status()
         data = response.json()
-        usdt_dominance = data["data"]["btc_dominance"]  # Replace with the correct path if necessary
+        print("CoinMarketCap API Response:", data)  # Debugging
+        # Update the key path based on the API response structure
+        usdt_dominance = data["data"]["quote"]["USDT"]["percent_dominance"]
         return usdt_dominance
     except Exception as e:
         print(f"Error fetching data from CoinMarketCap: {e}")
@@ -44,24 +46,24 @@ def get_usdt_dominance():
 
 @app.route("/api/webhook", methods=["POST"])
 def monitor_usdt():
-    """Trigger USDT dominance monitoring manually or on schedule."""
+    """Monitor USDT dominance."""
     dominance = get_usdt_dominance()
     if dominance is None:
         return {"error": "Failed to fetch USDT dominance"}, 500
 
-    if dominance >= USDT_D_THRESHOLD:
-        message = f"🚨 Alert! USDT Dominance has reached {dominance}%!"
+    if dominance <= USDT_D_THRESHOLD:  # Alert when below the threshold
+        message = f"🚨 Alert! USDT Dominance has dropped to {dominance}%!"
         if send_telegram_alert(message):
             return {"message": "Alert sent successfully!", "usdt_dominance": dominance}, 200
         else:
             return {"error": "Failed to send Telegram alert"}, 500
     else:
-        return {"message": f"USDT Dominance is currently {dominance}%, below the threshold."}, 200
+        return {"message": f"USDT Dominance is currently {dominance}%, above the threshold."}, 200
 
 
 @app.route("/test-env", methods=["GET"])
 def test_env():
-    """Test environment variables to ensure they're loaded correctly."""
+    """Test environment variables."""
     return {
         "CMC_API": CMC_API_KEY is not None,
         "CHAT_ID": CHAT_ID is not None,

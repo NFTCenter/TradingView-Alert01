@@ -79,5 +79,26 @@ def test_env():
     }
 
 
+@app.route("/api/telegram", methods=["POST"])
+def telegram_webhook():
+    """Handle Telegram bot commands."""
+    data = request.json
+    if "message" in data and "text" in data["message"]:
+        chat_id = data["message"]["chat"]["id"]
+        text = data["message"]["text"]
+
+        if text == "/getusdtdom":
+            # Fetch USDT dominance
+            dominance = get_usdt_dominance()
+            if dominance is not None:
+                message = f"Current USDT Dominance: {dominance:.2f}%"
+                send_telegram_alert(message)
+                return {"message": "USDT dominance sent to Telegram!"}, 200
+            else:
+                return {"error": "Failed to fetch USDT dominance"}, 500
+
+    return {"message": "Command not recognized"}, 400
+
+
 if __name__ == "__main__":
     app.run(debug=True)  # For local testing only

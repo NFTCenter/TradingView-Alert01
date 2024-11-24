@@ -37,7 +37,7 @@ def get_usdt_dominance():
         response.raise_for_status()
         data = response.json()
         # Assuming USDT dominance data is under this key structure
-        usdt_dominance = data["data"]["quote"]["USDT"]["percent_dominance"]
+        usdt_dominance = data["data"]["btc_dominance"]  # Replace with the correct path if necessary
         return usdt_dominance
     except Exception as e:
         print(f"Error fetching data from CoinMarketCap: {e}")
@@ -71,22 +71,7 @@ def test_env():
     }
 
 
-# Optional: Run scheduled monitoring if this script is executed directly
-def monitor_usdt_dominance_loop():
-    """Continuous monitoring loop for USDT dominance."""
-    while True:
-        dominance = get_usdt_dominance()
-        if dominance is not None:
-            print(f"Current USDT Dominance: {dominance}%")
-            if dominance >= USDT_D_THRESHOLD:
-                message = f"🚨 Alert! USDT Dominance has reached {dominance}%!"
-                if send_telegram_alert(message):
-                    print("Alert sent successfully!")
-                else:
-                    print("Failed to send alert.")
-        time.sleep(60)  # Check every 60 seconds
-
-
+# Remove the continuous loop for serverless deployment
 if __name__ == "__main__":
-    # For local testing or debugging
-    monitor_usdt_dominance_loop()
+    # For local testing only
+    app.run(debug=True)

@@ -23,7 +23,7 @@
   "crons": [
     {
       "path": "/api/webhook",
-      "schedule": "0 * * * *"  # Runs every hour
+      "schedule": "0 * * * *"
     }
   ]
 }
